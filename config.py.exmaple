@@ -1,0 +1,3 @@
+url = "" #xmlrpc地址
+user = "" #用户名
+passwd = "" #密码
