@@ -1,7 +1,7 @@
 ## 推送本地文章至typecho博客
 
 #### 用法
-把`config.py.example`复制一份为`config.py`，并配置好相关信息
+把`config.py.example`复制一份为`config.py`，并配置好相关信息  
 Markdown文件格式参考，类似`Hexo`，目前还不支持多标签
 ```
 ---
