@@ -1,6 +1,4 @@
-import xmlrpc.client
-import sys, getopt
-import os
+import xmlrpc.client, sys, getopt, os, yaml, re
 from config import *
 
 
@@ -21,31 +19,23 @@ class TypechoXmlrpcCLient(object):
 
 
 if __name__ == "__main__":
-    #处理命令行参数
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "hf:c:t:")
-    except getopt.GetoptError:
-        print("main.py -f <MarkdownFile> -c <category> -t <tags>")
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == "-h":
-            print("main.py -f <MarkdownFile> -c <category> -t <tags>")
-            sys.exit()
-        elif opt == "-f":
-            input_file = arg
-        elif opt == "-c":
-            category = arg.split(" ")
-        elif opt == "-t":
-            tags = arg
-            #tags = arg.split(" ")
+    input_file = sys.argv[1]
+    with open(input_file, 'r', encoding='utf-8') as f:
+        text = f.read()
+        data = re.search(r'---.*---', text, flags=re.DOTALL)  #正则匹配文章信息
+        conf = yaml.load(data[0][4:-3], Loader=yaml.FullLoader)
+        body = text[data.span()[1] + 1:]  #获取文章正文
 
     #构造content结构
     content = dict()
-    content["title"] = "".join(os.path.basename(input_file).split(".")[:-1])
-    content["categories"] = category
-    content["mt_keywords"] = tags
-    with open(input_file, "r", encoding="utf-8") as f:
-        content["description"] = f.read()
+    content["title"] = conf['title']
+    content["categories"] = conf['categories'] if isinstance(
+        conf['categories'], list) else [
+            conf['categories'],
+        ]
+    content["mt_keywords"] = conf['tags']
+    content["description"] = body
+
     #推送
     push = TypechoXmlrpcCLient(url, user, passwd)
     push.metaWeblog_newPost(content, True)
